@@ -68,6 +68,7 @@
             dataGridView1.Name = "dataGridView1";
             dataGridView1.Size = new Size(755, 216);
             dataGridView1.TabIndex = 3;
+            dataGridView1.CellDoubleClick += DataGridView1_CellDoubleClick;
             // 
             // btnPesquisar
             // 
@@ -77,6 +78,7 @@
             btnPesquisar.TabIndex = 4;
             btnPesquisar.Text = "Pesquisar";
             btnPesquisar.UseVisualStyleBackColor = true;
+            btnPesquisar.Click += BtnPesquisar_Click;
             // 
             // FrmPesquisa
             // 

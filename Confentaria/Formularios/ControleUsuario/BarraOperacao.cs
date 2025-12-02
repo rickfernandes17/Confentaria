@@ -24,8 +24,6 @@ namespace Confentaria.Formularios.ControleUsuario
             btnPesquisar.Text = "Pesquisar";
             btnPesquisar.ImageIndex = 2;
             btnSalvar.Text = "Salvar";
-            btnSalvar.Enabled = false;
-            btnApagar.Enabled = false;
             btnApagar.Text = "Apagar";
 
             btnAdicionar.Click += (s, e) => OnAdicionar?.Invoke(this, EventArgs.Empty);
@@ -37,10 +35,6 @@ namespace Confentaria.Formularios.ControleUsuario
 
         public void MostrarBotao(bool mostrar)
         {
-            btnSalvar.Enabled = mostrar;
-            btnApagar.Enabled = mostrar;
-            btnAdicionar.Enabled = !mostrar;
-            btnPesquisar.Enabled = !mostrar;
         }
 
         private void btnPesquisar_Click(object sender, EventArgs e)

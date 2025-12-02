@@ -153,14 +153,43 @@ namespace Confentaria.Formularios
         // Exemplo de método que você pode chamar a partir de um botão "Pesquisar" no FrmProdutos
         private void AbrirPesquisaProdutos()
         {
-            _context ??= DatabaseHelper.CreateDbContext();
+            try
+            {
+                _context ??= DatabaseHelper.CreateDbContext();
 
-            using var frm = new FrmPesquisa();
-            //frm.ConfigurarPara<Produto>(_context);
-            frm.ShowDialog();
+                using var frm = new FrmPesquisa();
 
-            // Opcional: ler seleção do DataGridView (precisa expor API no FrmPesquisa se quiser retornar item selecionado)
+                // Configura o formulário para trabalhar com a entidade Produto
+                frm.ConfigurarPara<Produto>(_context);
+
+                // Opcional: adiciona botão Selecionar
+                frm.AdicionarBotaoSelecionar();
+
+                // Exibe o formulário como diálogo
+                if (frm.ShowDialog() == DialogResult.OK)
+                {
+                    // Obtém o produto selecionado
+                    var produtoSelecionado = frm.ItemSelecionado as Produto;
+
+                    if (produtoSelecionado != null)
+                    {
+                        // Carrega o produto completo do banco (com tracking)
+                        var produto = _context.Produtos.Find(produtoSelecionado.Id);
+
+                        if (produto != null)
+                        {
+                            PreencherCampos(produto);
+                            MessageBox.Show($"Produto '{produto.Nome}' carregado com sucesso!",
+                                "Sucesso", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Erro ao abrir pesquisa: {ex.Message}",
+                    "Erro", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
         }
-
     }
 }
