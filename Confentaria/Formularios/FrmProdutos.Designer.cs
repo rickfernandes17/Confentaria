@@ -224,10 +224,8 @@
             // 
             // txtId
             // 
-            txtId.Enabled = false;
             txtId.Location = new Point(10, 50);
             txtId.Name = "txtId";
-            txtId.ReadOnly = true;
             txtId.Size = new Size(60, 23);
             txtId.TabIndex = 4;
             // 
