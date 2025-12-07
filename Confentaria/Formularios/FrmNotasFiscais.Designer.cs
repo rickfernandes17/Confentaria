@@ -52,6 +52,7 @@ namespace Confentaria.Formularios
             btnSalvar = new Button();
             btnNovo = new Button();
             tabPage2 = new TabPage();
+            btnVincularProdutos = new Button();
             dgvItens = new DataGridView();
             ((System.ComponentModel.ISupportInitialize)splitContainer1).BeginInit();
             splitContainer1.Panel1.SuspendLayout();
@@ -415,24 +416,35 @@ namespace Confentaria.Formularios
             // tabPage2
             // 
             tabPage2.Controls.Add(dgvItens);
+            tabPage2.Controls.Add(btnVincularProdutos);
             tabPage2.Location = new Point(4, 24);
             tabPage2.Name = "tabPage2";
             tabPage2.Padding = new Padding(3);
-            tabPage2.Size = new Size(992, 368);
+            tabPage2.Size = new Size(992, 171);
             tabPage2.TabIndex = 1;
             tabPage2.Text = "Itens da Nota Fiscal";
             tabPage2.UseVisualStyleBackColor = true;
+            // 
+            // btnVincularProdutos
+            // 
+            btnVincularProdutos.Location = new Point(10, 10);
+            btnVincularProdutos.Name = "btnVincularProdutos";
+            btnVincularProdutos.Size = new Size(150, 30);
+            btnVincularProdutos.TabIndex = 1;
+            btnVincularProdutos.Text = "Vincular Produtos";
+            btnVincularProdutos.UseVisualStyleBackColor = true;
+            btnVincularProdutos.Click += btnVincularProdutos_Click;
             // 
             // dgvItens
             // 
             dgvItens.AllowUserToAddRows = false;
             dgvItens.AllowUserToDeleteRows = false;
+            dgvItens.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
             dgvItens.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            dgvItens.Dock = DockStyle.Fill;
-            dgvItens.Location = new Point(3, 3);
+            dgvItens.Location = new Point(10, 50);
             dgvItens.Name = "dgvItens";
             dgvItens.ReadOnly = true;
-            dgvItens.Size = new Size(986, 362);
+            dgvItens.Size = new Size(976, 315);
             dgvItens.TabIndex = 0;
             // 
             // FrmNotasFiscais
@@ -498,7 +510,7 @@ namespace Confentaria.Formularios
         private Button btnSalvar;
         private Button btnNovo;
         private TabPage tabPage2;
+        private Button btnVincularProdutos;
         private DataGridView dgvItens;
     }
 }
-
