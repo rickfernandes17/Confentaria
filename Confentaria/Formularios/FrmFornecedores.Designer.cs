@@ -17,15 +17,6 @@ namespace Confentaria.Formularios
 
         private void InitializeComponent()
         {
-            splitContainer1 = new SplitContainer();
-            groupBoxPesquisa = new GroupBox();
-            btnLimparPesquisa = new Button();
-            btnPesquisar = new Button();
-            txtPesquisaCnpjCpf = new TextBox();
-            label3 = new Label();
-            txtPesquisaNome = new TextBox();
-            label2 = new Label();
-            dgvFornecedores = new DataGridView();
             groupBoxCadastro = new GroupBox();
             txtObservacoes = new TextBox();
             label8 = new Label();
@@ -41,116 +32,9 @@ namespace Confentaria.Formularios
             labelNome = new Label();
             txtId = new TextBox();
             labelId = new Label();
-            btnExcluir = new Button();
-            btnSalvar = new Button();
-            btnNovo = new Button();
-            ((System.ComponentModel.ISupportInitialize)splitContainer1).BeginInit();
-            splitContainer1.Panel1.SuspendLayout();
-            splitContainer1.Panel2.SuspendLayout();
-            splitContainer1.SuspendLayout();
-            groupBoxPesquisa.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)dgvFornecedores).BeginInit();
+            barraOperacao1 = new Confentaria.Formularios.ControleUsuario.BarraOperacao();
             groupBoxCadastro.SuspendLayout();
             SuspendLayout();
-            // 
-            // splitContainer1
-            // 
-            splitContainer1.Dock = DockStyle.Fill;
-            splitContainer1.Location = new Point(0, 0);
-            splitContainer1.Name = "splitContainer1";
-            splitContainer1.Orientation = Orientation.Horizontal;
-            splitContainer1.SplitterDistance = 350;
-            splitContainer1.TabIndex = 0;
-            // 
-            // splitContainer1.Panel1
-            // 
-            splitContainer1.Panel1.Controls.Add(groupBoxPesquisa);
-            splitContainer1.Panel1.Controls.Add(dgvFornecedores);
-            // 
-            // splitContainer1.Panel2
-            // 
-            splitContainer1.Panel2.Controls.Add(groupBoxCadastro);
-            // 
-            // groupBoxPesquisa
-            // 
-            groupBoxPesquisa.Controls.Add(btnLimparPesquisa);
-            groupBoxPesquisa.Controls.Add(btnPesquisar);
-            groupBoxPesquisa.Controls.Add(txtPesquisaCnpjCpf);
-            groupBoxPesquisa.Controls.Add(label3);
-            groupBoxPesquisa.Controls.Add(txtPesquisaNome);
-            groupBoxPesquisa.Controls.Add(label2);
-            groupBoxPesquisa.Dock = DockStyle.Top;
-            groupBoxPesquisa.Location = new Point(0, 0);
-            groupBoxPesquisa.Name = "groupBoxPesquisa";
-            groupBoxPesquisa.Size = new Size(1000, 80);
-            groupBoxPesquisa.TabIndex = 1;
-            groupBoxPesquisa.TabStop = false;
-            groupBoxPesquisa.Text = "Pesquisa";
-            // 
-            // btnLimparPesquisa
-            // 
-            btnLimparPesquisa.Location = new Point(420, 45);
-            btnLimparPesquisa.Name = "btnLimparPesquisa";
-            btnLimparPesquisa.Size = new Size(100, 25);
-            btnLimparPesquisa.TabIndex = 5;
-            btnLimparPesquisa.Text = "Limpar";
-            btnLimparPesquisa.UseVisualStyleBackColor = true;
-            btnLimparPesquisa.Click += btnLimparPesquisa_Click;
-            // 
-            // btnPesquisar
-            // 
-            btnPesquisar.Location = new Point(310, 45);
-            btnPesquisar.Name = "btnPesquisar";
-            btnPesquisar.Size = new Size(100, 25);
-            btnPesquisar.TabIndex = 4;
-            btnPesquisar.Text = "Pesquisar";
-            btnPesquisar.UseVisualStyleBackColor = true;
-            // 
-            // txtPesquisaCnpjCpf
-            // 
-            txtPesquisaCnpjCpf.Location = new Point(230, 45);
-            txtPesquisaCnpjCpf.Name = "txtPesquisaCnpjCpf";
-            txtPesquisaCnpjCpf.Size = new Size(200, 23);
-            txtPesquisaCnpjCpf.TabIndex = 3;
-            // 
-            // label3
-            // 
-            label3.AutoSize = true;
-            label3.Location = new Point(230, 27);
-            label3.Name = "label3";
-            label3.Size = new Size(64, 15);
-            label3.TabIndex = 2;
-            label3.Text = "CNPJ/CPF:";
-            // 
-            // txtPesquisaNome
-            // 
-            txtPesquisaNome.Location = new Point(10, 45);
-            txtPesquisaNome.Name = "txtPesquisaNome";
-            txtPesquisaNome.Size = new Size(200, 23);
-            txtPesquisaNome.TabIndex = 1;
-            // 
-            // label2
-            // 
-            label2.AutoSize = true;
-            label2.Location = new Point(10, 27);
-            label2.Name = "label2";
-            label2.Size = new Size(43, 15);
-            label2.TabIndex = 0;
-            label2.Text = "Nome:";
-            // 
-            // dgvFornecedores
-            // 
-            dgvFornecedores.AllowUserToAddRows = false;
-            dgvFornecedores.AllowUserToDeleteRows = false;
-            dgvFornecedores.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            dgvFornecedores.Dock = DockStyle.Fill;
-            dgvFornecedores.Location = new Point(0, 80);
-            dgvFornecedores.Name = "dgvFornecedores";
-            dgvFornecedores.ReadOnly = true;
-            dgvFornecedores.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
-            dgvFornecedores.Size = new Size(1000, 270);
-            dgvFornecedores.TabIndex = 0;
-            dgvFornecedores.SelectionChanged += dgvFornecedores_SelectionChanged;
             // 
             // groupBoxCadastro
             // 
@@ -168,14 +52,11 @@ namespace Confentaria.Formularios
             groupBoxCadastro.Controls.Add(labelNome);
             groupBoxCadastro.Controls.Add(txtId);
             groupBoxCadastro.Controls.Add(labelId);
-            groupBoxCadastro.Controls.Add(btnExcluir);
-            groupBoxCadastro.Controls.Add(btnSalvar);
-            groupBoxCadastro.Controls.Add(btnNovo);
             groupBoxCadastro.Dock = DockStyle.Fill;
-            groupBoxCadastro.Location = new Point(0, 0);
+            groupBoxCadastro.Location = new Point(0, 46);
             groupBoxCadastro.Name = "groupBoxCadastro";
-            groupBoxCadastro.Size = new Size(1000, 346);
-            groupBoxCadastro.TabIndex = 0;
+            groupBoxCadastro.Size = new Size(1000, 654);
+            groupBoxCadastro.TabIndex = 1;
             groupBoxCadastro.TabStop = false;
             groupBoxCadastro.Text = "Cadastro";
             // 
@@ -192,7 +73,7 @@ namespace Confentaria.Formularios
             label8.AutoSize = true;
             label8.Location = new Point(10, 182);
             label8.Name = "label8";
-            label8.Size = new Size(74, 15);
+            label8.Size = new Size(77, 15);
             label8.TabIndex = 17;
             label8.Text = "Observações:";
             // 
@@ -224,7 +105,7 @@ namespace Confentaria.Formularios
             label6.AutoSize = true;
             label6.Location = new Point(130, 132);
             label6.Name = "label6";
-            label6.Size = new Size(54, 15);
+            label6.Size = new Size(55, 15);
             label6.TabIndex = 13;
             label6.Text = "Telefone:";
             // 
@@ -256,7 +137,7 @@ namespace Confentaria.Formularios
             label4.AutoSize = true;
             label4.Location = new Point(230, 32);
             label4.Name = "label4";
-            label4.Size = new Size(64, 15);
+            label4.Size = new Size(63, 15);
             label4.TabIndex = 7;
             label4.Text = "CNPJ/CPF:";
             // 
@@ -294,69 +175,34 @@ namespace Confentaria.Formularios
             labelId.TabIndex = 3;
             labelId.Text = "ID:";
             // 
-            // btnExcluir
+            // barraOperacao1
             // 
-            btnExcluir.Location = new Point(200, 300);
-            btnExcluir.Name = "btnExcluir";
-            btnExcluir.Size = new Size(100, 35);
-            btnExcluir.TabIndex = 2;
-            btnExcluir.Text = "Excluir";
-            btnExcluir.UseVisualStyleBackColor = true;
-            btnExcluir.Click += btnExcluir_Click;
-            // 
-            // btnSalvar
-            // 
-            btnSalvar.Location = new Point(100, 300);
-            btnSalvar.Name = "btnSalvar";
-            btnSalvar.Size = new Size(100, 35);
-            btnSalvar.TabIndex = 1;
-            btnSalvar.Text = "Salvar";
-            btnSalvar.UseVisualStyleBackColor = true;
-            btnSalvar.Click += btnSalvar_Click;
-            // 
-            // btnNovo
-            // 
-            btnNovo.Location = new Point(10, 300);
-            btnNovo.Name = "btnNovo";
-            btnNovo.Size = new Size(100, 35);
-            btnNovo.TabIndex = 0;
-            btnNovo.Text = "Novo";
-            btnNovo.UseVisualStyleBackColor = true;
-            btnNovo.Click += btnNovo_Click;
+            barraOperacao1.AutoSize = true;
+            barraOperacao1.Dock = DockStyle.Top;
+            barraOperacao1.Location = new Point(0, 0);
+            barraOperacao1.Name = "barraOperacao1";
+            barraOperacao1.Size = new Size(1000, 46);
+            barraOperacao1.TabIndex = 20;
             // 
             // FrmFornecedores
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
             ClientSize = new Size(1000, 700);
-            Controls.Add(splitContainer1);
+            Controls.Add(groupBoxCadastro);
+            Controls.Add(barraOperacao1);
             Name = "FrmFornecedores";
             Text = "Cadastro de Fornecedores";
             WindowState = FormWindowState.Maximized;
             FormClosing += FrmFornecedores_FormClosing;
-            splitContainer1.Panel1.ResumeLayout(false);
-            splitContainer1.Panel2.ResumeLayout(false);
-            ((System.ComponentModel.ISupportInitialize)splitContainer1).EndInit();
-            splitContainer1.ResumeLayout(false);
-            groupBoxPesquisa.ResumeLayout(false);
-            groupBoxPesquisa.PerformLayout();
-            ((System.ComponentModel.ISupportInitialize)dgvFornecedores).EndInit();
             groupBoxCadastro.ResumeLayout(false);
             groupBoxCadastro.PerformLayout();
             ResumeLayout(false);
+            PerformLayout();
         }
 
         #endregion
 
-        private SplitContainer splitContainer1;
-        private GroupBox groupBoxPesquisa;
-        private Button btnLimparPesquisa;
-        private Button btnPesquisar;
-        private TextBox txtPesquisaCnpjCpf;
-        private Label label3;
-        private TextBox txtPesquisaNome;
-        private Label label2;
-        private DataGridView dgvFornecedores;
         private GroupBox groupBoxCadastro;
         private TextBox txtObservacoes;
         private Label label8;
@@ -372,9 +218,7 @@ namespace Confentaria.Formularios
         private Label labelNome;
         private TextBox txtId;
         private Label labelId;
-        private Button btnExcluir;
-        private Button btnSalvar;
-        private Button btnNovo;
+        private ControleUsuario.BarraOperacao barraOperacao1;
     }
 }
 

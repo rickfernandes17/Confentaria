@@ -18,6 +18,7 @@ namespace Confentaria.Formularios
         private void InitializeComponent()
         {
             splitContainer1 = new SplitContainer();
+            dgvNotasFiscais = new DataGridView();
             groupBoxPesquisa = new GroupBox();
             btnLimparPesquisa = new Button();
             btnPesquisar = new Button();
@@ -27,7 +28,6 @@ namespace Confentaria.Formularios
             label2 = new Label();
             txtPesquisaNumero = new TextBox();
             label1 = new Label();
-            dgvNotasFiscais = new DataGridView();
             tabControl1 = new TabControl();
             tabPage1 = new TabPage();
             groupBoxCadastro = new GroupBox();
@@ -52,14 +52,14 @@ namespace Confentaria.Formularios
             btnSalvar = new Button();
             btnNovo = new Button();
             tabPage2 = new TabPage();
-            btnVincularProdutos = new Button();
             dgvItens = new DataGridView();
+            btnVincularProdutos = new Button();
             ((System.ComponentModel.ISupportInitialize)splitContainer1).BeginInit();
             splitContainer1.Panel1.SuspendLayout();
             splitContainer1.Panel2.SuspendLayout();
             splitContainer1.SuspendLayout();
-            groupBoxPesquisa.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)dgvNotasFiscais).BeginInit();
+            groupBoxPesquisa.SuspendLayout();
             tabControl1.SuspendLayout();
             tabPage1.SuspendLayout();
             groupBoxCadastro.SuspendLayout();
@@ -83,8 +83,22 @@ namespace Confentaria.Formularios
             // 
             splitContainer1.Panel2.Controls.Add(tabControl1);
             splitContainer1.Size = new Size(1000, 700);
-            splitContainer1.SplitterDistance = 497;
+            splitContainer1.SplitterDistance = 200;
             splitContainer1.TabIndex = 0;
+            // 
+            // dgvNotasFiscais
+            // 
+            dgvNotasFiscais.AllowUserToAddRows = false;
+            dgvNotasFiscais.AllowUserToDeleteRows = false;
+            dgvNotasFiscais.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            dgvNotasFiscais.Dock = DockStyle.Fill;
+            dgvNotasFiscais.Location = new Point(0, 80);
+            dgvNotasFiscais.Name = "dgvNotasFiscais";
+            dgvNotasFiscais.ReadOnly = true;
+            dgvNotasFiscais.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
+            dgvNotasFiscais.Size = new Size(1000, 120);
+            dgvNotasFiscais.TabIndex = 0;
+            dgvNotasFiscais.SelectionChanged += dgvNotasFiscais_SelectionChanged;
             // 
             // groupBoxPesquisa
             // 
@@ -173,20 +187,6 @@ namespace Confentaria.Formularios
             label1.TabIndex = 0;
             label1.Text = "Número:";
             // 
-            // dgvNotasFiscais
-            // 
-            dgvNotasFiscais.AllowUserToAddRows = false;
-            dgvNotasFiscais.AllowUserToDeleteRows = false;
-            dgvNotasFiscais.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            dgvNotasFiscais.Dock = DockStyle.Fill;
-            dgvNotasFiscais.Location = new Point(0, 80);
-            dgvNotasFiscais.Name = "dgvNotasFiscais";
-            dgvNotasFiscais.ReadOnly = true;
-            dgvNotasFiscais.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
-            dgvNotasFiscais.Size = new Size(1000, 417);
-            dgvNotasFiscais.TabIndex = 0;
-            dgvNotasFiscais.SelectionChanged += dgvNotasFiscais_SelectionChanged;
-            // 
             // tabControl1
             // 
             tabControl1.Controls.Add(tabPage1);
@@ -195,7 +195,7 @@ namespace Confentaria.Formularios
             tabControl1.Location = new Point(0, 0);
             tabControl1.Name = "tabControl1";
             tabControl1.SelectedIndex = 0;
-            tabControl1.Size = new Size(1000, 199);
+            tabControl1.Size = new Size(1000, 496);
             tabControl1.TabIndex = 0;
             // 
             // tabPage1
@@ -204,7 +204,7 @@ namespace Confentaria.Formularios
             tabPage1.Location = new Point(4, 24);
             tabPage1.Name = "tabPage1";
             tabPage1.Padding = new Padding(3);
-            tabPage1.Size = new Size(992, 171);
+            tabPage1.Size = new Size(992, 468);
             tabPage1.TabIndex = 0;
             tabPage1.Text = "Dados da Nota Fiscal";
             tabPage1.UseVisualStyleBackColor = true;
@@ -234,7 +234,7 @@ namespace Confentaria.Formularios
             groupBoxCadastro.Dock = DockStyle.Fill;
             groupBoxCadastro.Location = new Point(3, 3);
             groupBoxCadastro.Name = "groupBoxCadastro";
-            groupBoxCadastro.Size = new Size(986, 165);
+            groupBoxCadastro.Size = new Size(986, 462);
             groupBoxCadastro.TabIndex = 0;
             groupBoxCadastro.TabStop = false;
             groupBoxCadastro.Text = "Cadastro";
@@ -420,20 +420,10 @@ namespace Confentaria.Formularios
             tabPage2.Location = new Point(4, 24);
             tabPage2.Name = "tabPage2";
             tabPage2.Padding = new Padding(3);
-            tabPage2.Size = new Size(992, 171);
+            tabPage2.Size = new Size(992, 431);
             tabPage2.TabIndex = 1;
             tabPage2.Text = "Itens da Nota Fiscal";
             tabPage2.UseVisualStyleBackColor = true;
-            // 
-            // btnVincularProdutos
-            // 
-            btnVincularProdutos.Location = new Point(10, 10);
-            btnVincularProdutos.Name = "btnVincularProdutos";
-            btnVincularProdutos.Size = new Size(150, 30);
-            btnVincularProdutos.TabIndex = 1;
-            btnVincularProdutos.Text = "Vincular Produtos";
-            btnVincularProdutos.UseVisualStyleBackColor = true;
-            btnVincularProdutos.Click += btnVincularProdutos_Click;
             // 
             // dgvItens
             // 
@@ -446,6 +436,16 @@ namespace Confentaria.Formularios
             dgvItens.ReadOnly = true;
             dgvItens.Size = new Size(976, 315);
             dgvItens.TabIndex = 0;
+            // 
+            // btnVincularProdutos
+            // 
+            btnVincularProdutos.Location = new Point(10, 10);
+            btnVincularProdutos.Name = "btnVincularProdutos";
+            btnVincularProdutos.Size = new Size(150, 30);
+            btnVincularProdutos.TabIndex = 1;
+            btnVincularProdutos.Text = "Vincular Produtos";
+            btnVincularProdutos.UseVisualStyleBackColor = true;
+            btnVincularProdutos.Click += btnVincularProdutos_Click;
             // 
             // FrmNotasFiscais
             // 
@@ -461,9 +461,9 @@ namespace Confentaria.Formularios
             splitContainer1.Panel2.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)splitContainer1).EndInit();
             splitContainer1.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)dgvNotasFiscais).EndInit();
             groupBoxPesquisa.ResumeLayout(false);
             groupBoxPesquisa.PerformLayout();
-            ((System.ComponentModel.ISupportInitialize)dgvNotasFiscais).EndInit();
             tabControl1.ResumeLayout(false);
             tabPage1.ResumeLayout(false);
             groupBoxCadastro.ResumeLayout(false);

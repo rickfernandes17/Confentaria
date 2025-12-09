@@ -12,42 +12,12 @@ namespace Confentaria.Formularios
         public FrmFornecedores()
         {
             InitializeComponent();
-            CarregarDados();
+            barraOperacao1.OnAdicionar += btnNovo_Click;
+            barraOperacao1.OnSalvar += btnSalvar_Click;
+            barraOperacao1.OnExcluir += btnExcluir_Click;
+            barraOperacao1.OnPesquisar += btnPesquisar_Click;
         }
 
-        private void CarregarDados()
-        {
-            try
-            {
-                // Desabilitar evento temporariamente para evitar preenchimento automático
-                dgvFornecedores.SelectionChanged -= dgvFornecedores_SelectionChanged;
-                
-                _context = DatabaseHelper.CreateDbContext();
-                var fornecedores = _context.Fornecedores
-                    .OrderBy(f => f.Nome)
-                    .ToList();
-
-                dgvFornecedores.DataSource = fornecedores;
-                dgvFornecedores.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
-                dgvFornecedores.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
-                dgvFornecedores.MultiSelect = false;
-                dgvFornecedores.ReadOnly = true;
-
-                // Limpar seleção
-                dgvFornecedores.ClearSelection();
-                
-                LimparCampos();
-                
-                // Reabilitar evento
-                dgvFornecedores.SelectionChanged += dgvFornecedores_SelectionChanged;
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show($"Erro ao carregar dados: {ex.Message}", "Erro", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                // Reabilitar evento mesmo em caso de erro
-                dgvFornecedores.SelectionChanged += dgvFornecedores_SelectionChanged;
-            }
-        }
 
         private void LimparCampos()
         {
@@ -59,8 +29,6 @@ namespace Confentaria.Formularios
             txtTelefone.Clear();
             txtEmail.Clear();
             txtObservacoes.Clear();
-            btnExcluir.Enabled = false;
-            btnSalvar.Text = "Salvar";
         }
 
         private void PreencherCampos(Fornecedor fornecedor)
@@ -73,8 +41,6 @@ namespace Confentaria.Formularios
             txtTelefone.Text = fornecedor.Telefone ?? string.Empty;
             txtEmail.Text = fornecedor.Email ?? string.Empty;
             txtObservacoes.Text = fornecedor.Observacoes ?? string.Empty;
-            btnExcluir.Enabled = true;
-            btnSalvar.Text = "Atualizar";
         }
 
         private void btnNovo_Click(object sender, EventArgs e)
@@ -108,7 +74,6 @@ namespace Confentaria.Formularios
                     if (fornecedor == null)
                     {
                         MessageBox.Show("Fornecedor não encontrado!", "Erro", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                        CarregarDados();
                         return;
                     }
                 }
@@ -122,8 +87,8 @@ namespace Confentaria.Formularios
                 fornecedor.DataAtualizacao = DateTime.Now;
 
                 _context.SaveChanges();
+                PreencherCampos(fornecedor);
                 MessageBox.Show("Fornecedor salvo com sucesso!", "Sucesso", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                CarregarDados();
             }
             catch (Exception ex)
             {
@@ -155,8 +120,8 @@ namespace Confentaria.Formularios
                     {
                         _context.Fornecedores.Remove(fornecedor);
                         _context.SaveChanges();
+                        LimparCampos();
                         MessageBox.Show("Fornecedor excluído com sucesso!", "Sucesso", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                        CarregarDados();
                     }
                 }
                 catch (Exception ex)
@@ -166,30 +131,39 @@ namespace Confentaria.Formularios
             }
         }
 
-        
-
-        private void btnLimparPesquisa_Click(object sender, EventArgs e)
-        {
-            txtPesquisaNome.Clear();
-            txtPesquisaCnpjCpf.Clear();
-            CarregarDados();
-        }
-
-        private void dgvFornecedores_SelectionChanged(object sender, EventArgs e)
-        {
-            if (dgvFornecedores.SelectedRows.Count > 0)
-            {
-                var fornecedor = dgvFornecedores.SelectedRows[0].DataBoundItem as Fornecedor;
-                if (fornecedor != null)
-                {
-                    PreencherCampos(fornecedor);
-                }
-            }
-        }
-
         private void FrmFornecedores_FormClosing(object sender, FormClosingEventArgs e)
         {
             _context?.Dispose();
+        }
+
+        private void btnPesquisar_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                _context ??= DatabaseHelper.CreateDbContext();
+                using var frm = new FrmPesquisa();
+                // Configura o formulário para trabalhar com a entidade Produto
+                frm.ConfigurarPara<Fornecedor>(_context);
+
+                //Exibe o formulário de pesquisa como diálogo modal
+                if (frm.ShowDialog() == DialogResult.OK)
+                {
+                    var fornecedorSelecionado = frm.ItemSelecionado as Fornecedor;
+                    if (fornecedorSelecionado != null)
+                    {
+                        // Recarrega o fornecedor do banco de dados para garantir que temos os dados mais recentes
+                        var fornecedor = _context.Fornecedores.Find(fornecedorSelecionado.Id);
+                        if (fornecedor != null)
+                        {
+                            PreencherCampos(fornecedor);
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Erro ao pesquisar: {ex.Message}", "Erro", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
         }
     }
 }
