@@ -1,5 +1,6 @@
 ﻿using Confentaria.Data;
 using Confentaria.Models;
+using Confentaria.Services;
 using Microsoft.EntityFrameworkCore;
 
 namespace Confentaria.Formularios
@@ -11,11 +12,13 @@ namespace Confentaria.Formularios
     {
         private ConfentariaDbContext _context;
         private NotaFiscal _notaFiscal;
+        private EstoqueService _estoqueService;
 
         public FrmVincularProdutosNota(ConfentariaDbContext context, NotaFiscal notaFiscal)
         {
             _context = context;
             _notaFiscal = notaFiscal;
+            _estoqueService = new EstoqueService(context);
             InitializeComponent();
             ConfigurarFormulario();
             CarregarItens();
@@ -28,6 +31,10 @@ namespace Confentaria.Formularios
             btnCriarNovo.Click += BtnCriarNovo_Click;
             btnIgnorar.Click += BtnIgnorar_Click;
             btnFechar.Click += (s, e) => this.Close();
+            btnProcessarNota.Click += BtnProcessarNota_Click;
+
+            // Configura eventos de filtro
+            txtPesquisaProduto.TextChanged += TxtPesquisaProduto_TextChanged;
 
             // Configura o DataGridView
             dgvItensNota.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
@@ -36,6 +43,9 @@ namespace Confentaria.Formularios
             dgvItensNota.ReadOnly = true;
             dgvItensNota.AllowUserToAddRows = false;
             dgvItensNota.AllowUserToDeleteRows = false;
+
+            // Checkbox de atualizar estoque marcado por padrão
+            chkAtualizarEstoque.Checked = true;
         }
 
         private void CarregarItens()
@@ -46,16 +56,24 @@ namespace Confentaria.Formularios
                 .Where(i => i.NotaFiscalId == _notaFiscal.Id)
                 .ToList();
 
-            dgvItensNota.DataSource = itens.Select(i => new
+            dgvItensNota.DataSource = itens.Select(i => 
             {
-                i.Id,
-                DescricaoNota = i.DescricaoOriginal,
-                CodigoNota = i.CodigoOriginal,
-                i.Quantidade,
-                i.UnidadeMedida,
-                i.ValorUnitario,
-                Status = i.FornecedorProdutoId == null ? "NÃO VINCULADO" : "VINCULADO",
-                ProdutoVinculado = i.FornecedorProduto?.Produto.Nome ?? ""
+                var quantidadeConvertida = i.Quantidade * (i.FornecedorProduto?.FatorConversao ?? 1);
+                return new
+                {
+                    i.Id,
+                    DescricaoNota = i.DescricaoOriginal,
+                    CodigoNota = i.CodigoOriginal,
+                    i.Quantidade,
+                    i.UnidadeMedida,
+                    i.ValorUnitario,
+                    Status = i.FornecedorProdutoId == null ? "NÃO VINCULADO" : "VINCULADO",
+                    ProdutoVinculado = i.FornecedorProduto?.Produto.Nome ?? "",
+                    EstoqueAtual = i.FornecedorProduto?.Produto.EstoqueAtual.ToString("F3") ?? "-",
+                    NovoEstoque = i.FornecedorProdutoId != null 
+                        ? (i.FornecedorProduto!.Produto.EstoqueAtual + quantidadeConvertida).ToString("F3") 
+                        : "-"
+                };
             }).ToList();
 
             // Destaca itens não vinculados
@@ -70,6 +88,30 @@ namespace Confentaria.Formularios
                     row.DefaultCellStyle.BackColor = Color.LightGreen;
                 }
             }
+
+            AtualizarResumo();
+        }
+
+        private void AtualizarResumo()
+        {
+            var totalItens = _context.NotaFiscalItens
+                .Count(i => i.NotaFiscalId == _notaFiscal.Id);
+
+            var itensVinculados = _context.NotaFiscalItens
+                .Count(i => i.NotaFiscalId == _notaFiscal.Id && i.FornecedorProdutoId != null);
+
+            var itensNaoVinculados = totalItens - itensVinculados;
+
+            lblResumo.Text = $"Total: {totalItens} | Vinculados: {itensVinculados} | Não Vinculados: {itensNaoVinculados}";
+
+            // Habilita botão de processar apenas se todos os itens estiverem vinculados
+            //btnProcessarNota.Enabled = itensNaoVinculados == 0 && totalItens > 0;
+        }
+
+        private void TxtPesquisaProduto_TextChanged(object? sender, EventArgs e)
+        {
+            // Este método será usado para filtrar produtos ao pesquisar
+            // Por enquanto, mantemos simples
         }
 
         private void BtnVincularSelecionado_Click(object? sender, EventArgs e)
@@ -98,7 +140,7 @@ namespace Confentaria.Formularios
 
                 if (produto != null)
                 {
-                    VincularProduto(item, produto);
+                    VincularProduto(item, produto, chkAtualizarEstoque.Checked);
                     CarregarItens();
                 }
             }
@@ -132,7 +174,7 @@ namespace Confentaria.Formularios
             _context.Produtos.Add(novoProduto);
             _context.SaveChanges();
 
-            VincularProduto(item, novoProduto);
+            VincularProduto(item, novoProduto, chkAtualizarEstoque.Checked);
 
             MessageBox.Show($"Produto '{novoProduto.Nome}' criado e vinculado com sucesso!",
                 "Sucesso", MessageBoxButtons.OK, MessageBoxIcon.Information);
@@ -153,7 +195,62 @@ namespace Confentaria.Formularios
                 "Informação", MessageBoxButtons.OK, MessageBoxIcon.Information);
         }
 
-        private void VincularProduto(NotaFiscalItem item, Produto produto)
+        private void BtnProcessarNota_Click(object? sender, EventArgs e)
+        {
+            if (_notaFiscal.DataProcessamento != null)
+            {
+                MessageBox.Show("Esta nota fiscal já foi processada anteriormente!",
+                    "Aviso", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+
+            var itensNaoVinculados = _context.NotaFiscalItens
+                .Count(i => i.NotaFiscalId == _notaFiscal.Id && i.FornecedorProdutoId == null);
+
+            if (itensNaoVinculados > 0)
+            {
+                MessageBox.Show("Vincule todos os itens antes de processar a nota!",
+                    "Aviso", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+
+            var atualizarEstoque = chkAtualizarEstoque.Checked;
+            var mensagemConfirmacao = atualizarEstoque
+                ? "Deseja processar esta nota fiscal e atualizar o estoque de todos os produtos vinculados?"
+                : "Deseja processar esta nota fiscal SEM atualizar o estoque?";
+
+            var resultado = MessageBox.Show(mensagemConfirmacao,
+                "Confirmar Processamento",
+                MessageBoxButtons.YesNo,
+                MessageBoxIcon.Question);
+
+            if (resultado == DialogResult.Yes)
+            {
+                try
+                {
+                    var resultadoProcessamento = _estoqueService.ProcessarNotaFiscal(_notaFiscal, atualizarEstoque);
+
+                    if (resultadoProcessamento.Sucesso)
+                    {
+                        MessageBox.Show(resultadoProcessamento.Mensagem,
+                            "Sucesso", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                        this.Close();
+                    }
+                    else
+                    {
+                        MessageBox.Show(resultadoProcessamento.Mensagem,
+                            "Erro", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show($"Erro ao processar nota: {ex.Message}",
+                        "Erro", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
+            }
+        }
+
+        private void VincularProduto(NotaFiscalItem item, Produto produto, bool atualizarEstoque)
         {
             var fornecedorId = _notaFiscal.FornecedorId;
 
@@ -162,8 +259,35 @@ namespace Confentaria.Formularios
                 .FirstOrDefault(fp => fp.FornecedorId == fornecedorId &&
                                      fp.ProdutoId == produto.Id);
 
-            if (vinculo == null)
+            decimal fatorConversao = 1;
+            bool isNovoVinculo = vinculo == null;
+
+            if (isNovoVinculo)
             {
+                // Detecta se as unidades são diferentes
+                var unidadeNota = (item.UnidadeMedida ?? "UN").Trim().ToUpper();
+                var unidadeProduto = produto.UnidadeMedida.Trim().ToUpper();
+
+                if (unidadeNota != unidadeProduto)
+                {
+                    // Solicita fator de conversão
+                    using var frmConversao = new FrmFatorConversao(
+                        item.UnidadeMedida ?? "UN",
+                        produto.UnidadeMedida,
+                        item.Quantidade
+                    );
+
+                    if (frmConversao.ShowDialog() == DialogResult.OK)
+                    {
+                        fatorConversao = frmConversao.FatorConversao;
+                    }
+                    else
+                    {
+                        // Usuário cancelou
+                        return;
+                    }
+                }
+
                 vinculo = new FornecedorProduto
                 {
                     FornecedorId = fornecedorId,
@@ -172,6 +296,7 @@ namespace Confentaria.Formularios
                     DescricaoFornecedor = item.DescricaoOriginal,
                     PrecoUnitario = item.ValorUnitario,
                     UnidadeMedidaFornecedor = item.UnidadeMedida,
+                    FatorConversao = fatorConversao,
                     DataCriacao = DateTime.Now
                 };
 
@@ -180,6 +305,9 @@ namespace Confentaria.Formularios
             }
             else
             {
+                // Usa o fator de conversão já existente
+                fatorConversao = vinculo.FatorConversao ?? 1;
+
                 // Atualiza o preço se mudou
                 if (vinculo.PrecoUnitario != item.ValorUnitario)
                 {
@@ -193,8 +321,36 @@ namespace Confentaria.Formularios
             item.FornecedorProdutoId = vinculo.Id;
             _context.SaveChanges();
 
-            MessageBox.Show($"Produto vinculado com sucesso!",
-                "Sucesso", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            // Calcula quantidade convertida
+            var quantidadeConvertida = item.Quantidade * fatorConversao;
+
+            // Atualiza estoque se solicitado
+            if (atualizarEstoque)
+            {
+                _estoqueService.AtualizarEstoque(produto, quantidadeConvertida, item.ValorUnitario, _notaFiscal.Id);
+                
+                var mensagem = $"Produto vinculado e estoque atualizado!\n" +
+                              $"Estoque anterior: {produto.EstoqueAtual - quantidadeConvertida:F3} {produto.UnidadeMedida}\n" +
+                              $"Novo estoque: {produto.EstoqueAtual:F3} {produto.UnidadeMedida}";
+
+                if (fatorConversao != 1)
+                {
+                    mensagem += $"\n\nConversão aplicada: {item.Quantidade:F3} {item.UnidadeMedida} × {fatorConversao:F3} = {quantidadeConvertida:F3} {produto.UnidadeMedida}";
+                }
+
+                MessageBox.Show(mensagem, "Sucesso", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            }
+            else
+            {
+                var mensagem = $"Produto vinculado com sucesso!";
+                
+                if (fatorConversao != 1)
+                {
+                    mensagem += $"\n\nFator de conversão: {fatorConversao:F3}";
+                }
+
+                MessageBox.Show(mensagem, "Sucesso", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            }
         }
     }
 }

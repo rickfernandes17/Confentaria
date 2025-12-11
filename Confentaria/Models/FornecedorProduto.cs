@@ -26,6 +26,14 @@ namespace Confentaria.Models
         [StringLength(20)]
         public string? UnidadeMedidaFornecedor { get; set; }
 
+        /// <summary>
+        /// Fator de conversão da unidade do fornecedor para a unidade do produto.
+        /// Exemplo: Se fornecedor vende em CX e produto em UN, e 1 CX = 20 UN, então FatorConversao = 20
+        /// Se NULL ou 1, não há conversão (mesma unidade)
+        /// </summary>
+        [Column(TypeName = "decimal(18,3)")]
+        public decimal? FatorConversao { get; set; }
+
         [StringLength(500)]
         public string? Observacoes { get; set; }
 

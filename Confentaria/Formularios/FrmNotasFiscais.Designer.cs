@@ -54,6 +54,7 @@ namespace Confentaria.Formularios
             tabPage2 = new TabPage();
             dgvItens = new DataGridView();
             btnVincularProdutos = new Button();
+            btnProcessarEstoque = new Button();
             ((System.ComponentModel.ISupportInitialize)splitContainer1).BeginInit();
             splitContainer1.Panel1.SuspendLayout();
             splitContainer1.Panel2.SuspendLayout();
@@ -416,6 +417,7 @@ namespace Confentaria.Formularios
             // tabPage2
             // 
             tabPage2.Controls.Add(dgvItens);
+            tabPage2.Controls.Add(btnProcessarEstoque);
             tabPage2.Controls.Add(btnVincularProdutos);
             tabPage2.Location = new Point(4, 24);
             tabPage2.Name = "tabPage2";
@@ -446,6 +448,20 @@ namespace Confentaria.Formularios
             btnVincularProdutos.Text = "Vincular Produtos";
             btnVincularProdutos.UseVisualStyleBackColor = true;
             btnVincularProdutos.Click += btnVincularProdutos_Click;
+            // 
+            // btnProcessarEstoque
+            // 
+            btnProcessarEstoque.BackColor = Color.FromArgb(0, 120, 215);
+            btnProcessarEstoque.FlatStyle = FlatStyle.Flat;
+            btnProcessarEstoque.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
+            btnProcessarEstoque.ForeColor = Color.White;
+            btnProcessarEstoque.Location = new Point(170, 10);
+            btnProcessarEstoque.Name = "btnProcessarEstoque";
+            btnProcessarEstoque.Size = new Size(180, 30);
+            btnProcessarEstoque.TabIndex = 2;
+            btnProcessarEstoque.Text = "Processar Estoque";
+            btnProcessarEstoque.UseVisualStyleBackColor = false;
+            btnProcessarEstoque.Click += btnProcessarEstoque_Click;
             // 
             // FrmNotasFiscais
             // 
@@ -512,5 +528,6 @@ namespace Confentaria.Formularios
         private TabPage tabPage2;
         private Button btnVincularProdutos;
         private DataGridView dgvItens;
+        private Button btnProcessarEstoque;
     }
 }

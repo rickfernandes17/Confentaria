@@ -1,5 +1,6 @@
 using Confentaria.Data;
 using Confentaria.Models;
+using Confentaria.Services;
 using Microsoft.EntityFrameworkCore;
 using System.Diagnostics;
 using System.Text;
@@ -394,7 +395,7 @@ namespace Confentaria.Formularios
                 DataEmissao = DateTime.Parse(dadosNota.DataEmissao),
                 Url = url,
                 ValorTotal = dadosNota.Produtos.Sum(p => p.Quantidade * p.PrecoUnitario),
-                DataProcessamento = DateTime.Now
+                //DataProcessamento = DateTime.Now
             };
 
             _context.NotasFiscais.Add(notaFiscal);
@@ -480,16 +481,23 @@ namespace Confentaria.Formularios
 
         private void VincularProduto(NotaFiscalItem item, Fornecedor fornecedor)
         {
+
+            // Busca produto já vinculado através do código original
+            var produtoPorCodigo = _context!.Produtos
+                .Where(p => p.FornecedorProdutos.Any(fp =>
+                    fp.NotaFiscalItens.Any(nfi => nfi.CodigoOriginal == item.CodigoOriginal)))
+                .FirstOrDefault();
+
             // Busca produto similar
             var produtoSimilar = _context!.Produtos
                 .FirstOrDefault(p => p.Nome.ToLower().Contains(item.DescricaoOriginal!.ToLower()) ||
                                     item.DescricaoOriginal!.ToLower().Contains(p.Nome.ToLower()));
 
-            if (produtoSimilar != null)
+            if (produtoPorCodigo != null )
             {
                 var resultado = MessageBox.Show(
                     $"Produto da nota: {item.DescricaoOriginal}\n" +
-                    $"Produto encontrado: {produtoSimilar.Nome}\n\n" +
+                    $"Produto encontrado: {produtoPorCodigo.Nome}\n\n" +
                     "Deseja vincular este produto?",
                     "Vincular Produto",
                     MessageBoxButtons.YesNoCancel,
@@ -497,7 +505,7 @@ namespace Confentaria.Formularios
 
                 if (resultado == DialogResult.Yes)
                 {
-                    CriarVinculoFornecedorProduto(item, fornecedor, produtoSimilar);
+                    CriarVinculoFornecedorProduto(item, fornecedor, produtoPorCodigo);
                 }
                 else if (resultado == DialogResult.No)
                 {
@@ -583,6 +591,75 @@ namespace Confentaria.Formularios
         {
             txtPesquisaNumero.Clear();
             CarregarDados();
+        }
+
+        private void btnProcessarEstoque_Click(object sender, EventArgs e)
+        {
+            if (_notaFiscalSelecionada == null)
+            {
+                MessageBox.Show("Selecione uma nota fiscal!", "Aviso",
+                    MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+
+            if (_notaFiscalSelecionada.DataProcessamento != null)
+            {
+                MessageBox.Show("Esta nota fiscal já foi processada anteriormente!",
+                    "Aviso", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+
+            try
+            {
+                _context ??= DatabaseHelper.CreateDbContext();
+                
+                var itensNaoVinculados = _context.NotaFiscalItens
+                    .Count(i => i.NotaFiscalId == _notaFiscalSelecionada.Id && i.FornecedorProdutoId == null);
+
+                if (itensNaoVinculados > 0)
+                {
+                    MessageBox.Show($"Existem {itensNaoVinculados} itens não vinculados.\n\n" +
+                                  "Vincule todos os itens antes de processar a nota!",
+                        "Aviso", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    return;
+                }
+
+                var resultado = MessageBox.Show(
+                    "Deseja processar esta nota fiscal e atualizar o estoque de todos os produtos vinculados?\n\n" +
+                    "Esta ação irá:\n" +
+                    "- Adicionar as quantidades ao estoque\n" +
+                    "- Recalcular o preço médio dos produtos\n" +
+                    "- Marcar a nota como processada",
+                    "Confirmar Processamento",
+                    MessageBoxButtons.YesNo,
+                    MessageBoxIcon.Question);
+
+                if (resultado == DialogResult.Yes)
+                {
+                    var estoqueService = new EstoqueService(_context);
+                    var resultadoProcessamento = estoqueService.ProcessarNotaFiscal(_notaFiscalSelecionada, true);
+
+                    if (resultadoProcessamento.Sucesso)
+                    {
+                        MessageBox.Show(resultadoProcessamento.Mensagem,
+                            "Sucesso", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                        
+                        // Recarrega dados para refletir mudanças
+                        CarregarDados();
+                        CarregarItensNota();
+                    }
+                    else
+                    {
+                        MessageBox.Show(resultadoProcessamento.Mensagem,
+                            "Erro", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Erro ao processar estoque: {ex.Message}",
+                    "Erro", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
         }
 
         private void FrmNotasFiscais_FormClosing(object sender, FormClosingEventArgs e)

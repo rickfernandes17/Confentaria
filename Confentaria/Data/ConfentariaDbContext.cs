@@ -23,6 +23,7 @@ namespace Confentaria.Data
         public DbSet<FornecedorProduto> FornecedorProdutos { get; set; }
         public DbSet<NotaFiscal> NotasFiscais { get; set; }
         public DbSet<NotaFiscalItem> NotaFiscalItens { get; set; }
+        public DbSet<MovimentacaoEstoque> MovimentacoesEstoque { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
