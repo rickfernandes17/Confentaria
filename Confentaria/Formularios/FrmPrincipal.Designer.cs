@@ -88,7 +88,7 @@
             // notasFiscaisToolStripMenuItem
             // 
             notasFiscaisToolStripMenuItem.Name = "notasFiscaisToolStripMenuItem";
-            notasFiscaisToolStripMenuItem.Size = new Size(180, 22);
+            notasFiscaisToolStripMenuItem.Size = new Size(142, 22);
             notasFiscaisToolStripMenuItem.Text = "Notas Fiscais";
             notasFiscaisToolStripMenuItem.Click += notasFiscaisToolStripMenuItem_Click;
             // 

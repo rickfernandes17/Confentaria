@@ -57,7 +57,7 @@ namespace Confentaria.Formularios
                 _context = DatabaseHelper.CreateDbContext();
                 var notas = _context.NotasFiscais
                     .Include(nf => nf.Fornecedor)
-                    .OrderByDescending(nf => nf.DataEmissao)
+                    .OrderByDescending(nf => nf.Id)
                     .ToList();
 
                 dgvNotasFiscais.DataSource = notas.Select(nf => new
@@ -67,7 +67,8 @@ namespace Confentaria.Formularios
                     nf.Numero,
                     nf.DataEmissao,
                     nf.ValorTotal,
-                    Processada = nf.DataProcessamento != null ? "Sim" : "Não"
+                    Processada = nf.DataProcessamento != null ? "Sim" : "Não",
+                    nf.DataProcessamento
                 }).ToList();
 
                 dgvNotasFiscais.ClearSelection();
@@ -394,8 +395,7 @@ namespace Confentaria.Formularios
                 Serie = dadosNota.Serie,
                 DataEmissao = DateTime.Parse(dadosNota.DataEmissao),
                 Url = url,
-                ValorTotal = dadosNota.Produtos.Sum(p => p.Quantidade * p.PrecoUnitario),
-                //DataProcessamento = DateTime.Now
+                ValorTotal = dadosNota.Produtos.Sum(p => p.Quantidade * p.PrecoUnitario)
             };
 
             _context.NotasFiscais.Add(notaFiscal);
@@ -553,6 +553,34 @@ namespace Confentaria.Formularios
 
             if (vinculoExistente == null)
             {
+                decimal fatorConversao = 1;
+
+                // Detecta se as unidades são diferentes
+                var unidadeNota = (item.UnidadeMedida ?? "UN").Trim().ToUpper();
+                var unidadeProduto = produto.UnidadeMedida.Trim().ToUpper();
+
+                if (unidadeNota != unidadeProduto)
+                {
+                    // Solicita fator de conversão
+                    using var frmConversao = new FrmFatorConversao(
+                        item.UnidadeMedida ?? "UN",
+                        produto.UnidadeMedida,
+                        item.Quantidade
+                    );
+
+                    if (frmConversao.ShowDialog() == DialogResult.OK)
+                    {
+                        fatorConversao = frmConversao.FatorConversao;
+                    }
+                    else
+                    {
+                        // Usuário cancelou - não cria o vínculo
+                        MessageBox.Show("Vinculação cancelada. O fator de conversão é necessário quando as unidades são diferentes.",
+                            "Aviso", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                        return;
+                    }
+                }
+
                 vinculoExistente = new FornecedorProduto
                 {
                     FornecedorId = fornecedor.Id,
@@ -561,11 +589,21 @@ namespace Confentaria.Formularios
                     DescricaoFornecedor = item.DescricaoOriginal,
                     PrecoUnitario = item.ValorUnitario,
                     UnidadeMedidaFornecedor = item.UnidadeMedida,
+                    FatorConversao = fatorConversao,
                     DataCriacao = DateTime.Now
                 };
 
                 _context.FornecedorProdutos.Add(vinculoExistente);
                 _context.SaveChanges();
+
+                // Exibe mensagem de confirmação
+                if (fatorConversao != 1)
+                {
+                    MessageBox.Show($"Produto vinculado com sucesso!\n\n" +
+                                  $"Fator de conversão aplicado: {fatorConversao:F3}\n" +
+                                  $"{item.UnidadeMedida} → {produto.UnidadeMedida}",
+                        "Sucesso", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                }
             }
 
             // Atualiza o item da nota com o vínculo
@@ -589,7 +627,6 @@ namespace Confentaria.Formularios
 
         private void btnLimparPesquisa_Click(object sender, EventArgs e)
         {
-            txtPesquisaNumero.Clear();
             CarregarDados();
         }
 
@@ -613,23 +650,38 @@ namespace Confentaria.Formularios
             {
                 _context ??= DatabaseHelper.CreateDbContext();
                 
-                var itensNaoVinculados = _context.NotaFiscalItens
-                    .Count(i => i.NotaFiscalId == _notaFiscalSelecionada.Id && i.FornecedorProdutoId == null);
+                var totalItens = _context.NotaFiscalItens
+                    .Count(i => i.NotaFiscalId == _notaFiscalSelecionada.Id);
 
-                if (itensNaoVinculados > 0)
+                var itensVinculados = _context.NotaFiscalItens
+                    .Count(i => i.NotaFiscalId == _notaFiscalSelecionada.Id && i.FornecedorProdutoId != null);
+
+                var itensNaoVinculados = totalItens - itensVinculados;
+
+                if (itensVinculados == 0)
                 {
-                    MessageBox.Show($"Existem {itensNaoVinculados} itens não vinculados.\n\n" +
-                                  "Vincule todos os itens antes de processar a nota!",
+                    MessageBox.Show("Nenhum item foi vinculado! Vincule pelo menos um item para processar a nota.",
                         "Aviso", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                     return;
                 }
 
-                var resultado = MessageBox.Show(
-                    "Deseja processar esta nota fiscal e atualizar o estoque de todos os produtos vinculados?\n\n" +
-                    "Esta ação irá:\n" +
-                    "- Adicionar as quantidades ao estoque\n" +
+                var mensagemConfirmacao = $"PROCESSAMENTO DA NOTA FISCAL\n\n" +
+                    $"Total de itens: {totalItens}\n" +
+                    $"Itens vinculados: {itensVinculados}\n" +
+                    $"Itens NÃO vinculados: {itensNaoVinculados}\n\n";
+
+                if (itensNaoVinculados > 0)
+                {
+                    mensagemConfirmacao += $"⚠ {itensNaoVinculados} item(ns) não vinculado(s) será(ão) IGNORADO(S).\n\n";
+                }
+
+                mensagemConfirmacao += "Esta ação irá:\n" +
+                    $"- Atualizar o estoque de {itensVinculados} produto(s) vinculado(s)\n" +
                     "- Recalcular o preço médio dos produtos\n" +
-                    "- Marcar a nota como processada",
+                    "- Marcar a nota como processada\n\n" +
+                    "Deseja continuar?";
+
+                var resultado = MessageBox.Show(mensagemConfirmacao,
                     "Confirmar Processamento",
                     MessageBoxButtons.YesNo,
                     MessageBoxIcon.Question);
@@ -650,8 +702,69 @@ namespace Confentaria.Formularios
                     }
                     else
                     {
-                        MessageBox.Show(resultadoProcessamento.Mensagem,
-                            "Erro", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        // Verifica se o erro é de conversão ausente
+                        if (resultadoProcessamento.FornecedorProdutoIdSemConversao.HasValue)
+                        {
+                            // Oferece ao usuário definir o fator de conversão agora
+                            var resposta = MessageBox.Show(
+                                resultadoProcessamento.Mensagem + "\n\n" +
+                                "Deseja definir o fator de conversão agora e tentar novamente?",
+                                "Erro de Conversão",
+                                MessageBoxButtons.YesNo,
+                                MessageBoxIcon.Question);
+
+                            if (resposta == DialogResult.Yes)
+                            {
+                                // Busca o FornecedorProduto que precisa de conversão
+                                var fornecedorProduto = _context.FornecedorProdutos
+                                    .Include(fp => fp.Produto)
+                                    .FirstOrDefault(fp => fp.Id == resultadoProcessamento.FornecedorProdutoIdSemConversao.Value);
+
+                                if (fornecedorProduto != null)
+                                {
+                                    // Busca um item da nota para obter a quantidade
+                                    var itemNota = _context.NotaFiscalItens
+                                        .FirstOrDefault(i => i.FornecedorProdutoId == fornecedorProduto.Id &&
+                                                           i.NotaFiscalId == _notaFiscalSelecionada.Id);
+
+                                    if (itemNota != null)
+                                    {
+                                        // Abre diálogo de conversão
+                                        using var frmConversao = new FrmFatorConversao(
+                                            fornecedorProduto.UnidadeMedidaFornecedor ?? "UN",
+                                            fornecedorProduto.Produto.UnidadeMedida,
+                                            itemNota.Quantidade
+                                        );
+
+                                        if (frmConversao.ShowDialog() == DialogResult.OK)
+                                        {
+                                            // Salva o fator de conversão
+                                            fornecedorProduto.FatorConversao = frmConversao.FatorConversao;
+                                            fornecedorProduto.DataAtualizacao = DateTime.Now;
+                                            _context.SaveChanges();
+
+                                            // Tenta processar novamente
+                                            MessageBox.Show(
+                                                $"Fator de conversão definido: {frmConversao.FatorConversao:F3}\n\n" +
+                                                "Processando nota fiscal novamente...",
+                                                "Conversão Configurada",
+                                                MessageBoxButtons.OK,
+                                                MessageBoxIcon.Information);
+
+                                            // Chama a função recursivamente para tentar novamente
+                                            btnProcessarEstoque_Click(sender, e);
+                                            return;
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                        else
+                        {
+                            // Outro tipo de erro
+                            MessageBox.Show(resultadoProcessamento.Mensagem,
+                                "Erro", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        }
                     }
                 }
             }

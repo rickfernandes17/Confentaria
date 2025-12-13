@@ -19,15 +19,6 @@ namespace Confentaria.Formularios
         {
             splitContainer1 = new SplitContainer();
             dgvNotasFiscais = new DataGridView();
-            groupBoxPesquisa = new GroupBox();
-            btnLimparPesquisa = new Button();
-            btnPesquisar = new Button();
-            dtpPesquisaFim = new DateTimePicker();
-            label3 = new Label();
-            dtpPesquisaInicio = new DateTimePicker();
-            label2 = new Label();
-            txtPesquisaNumero = new TextBox();
-            label1 = new Label();
             tabControl1 = new TabControl();
             tabPage1 = new TabPage();
             groupBoxCadastro = new GroupBox();
@@ -53,14 +44,13 @@ namespace Confentaria.Formularios
             btnNovo = new Button();
             tabPage2 = new TabPage();
             dgvItens = new DataGridView();
-            btnVincularProdutos = new Button();
             btnProcessarEstoque = new Button();
+            btnVincularProdutos = new Button();
             ((System.ComponentModel.ISupportInitialize)splitContainer1).BeginInit();
             splitContainer1.Panel1.SuspendLayout();
             splitContainer1.Panel2.SuspendLayout();
             splitContainer1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)dgvNotasFiscais).BeginInit();
-            groupBoxPesquisa.SuspendLayout();
             tabControl1.SuspendLayout();
             tabPage1.SuspendLayout();
             groupBoxCadastro.SuspendLayout();
@@ -78,7 +68,6 @@ namespace Confentaria.Formularios
             // splitContainer1.Panel1
             // 
             splitContainer1.Panel1.Controls.Add(dgvNotasFiscais);
-            splitContainer1.Panel1.Controls.Add(groupBoxPesquisa);
             // 
             // splitContainer1.Panel2
             // 
@@ -93,100 +82,13 @@ namespace Confentaria.Formularios
             dgvNotasFiscais.AllowUserToDeleteRows = false;
             dgvNotasFiscais.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize;
             dgvNotasFiscais.Dock = DockStyle.Fill;
-            dgvNotasFiscais.Location = new Point(0, 80);
+            dgvNotasFiscais.Location = new Point(0, 0);
             dgvNotasFiscais.Name = "dgvNotasFiscais";
             dgvNotasFiscais.ReadOnly = true;
             dgvNotasFiscais.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
-            dgvNotasFiscais.Size = new Size(1000, 120);
+            dgvNotasFiscais.Size = new Size(1000, 200);
             dgvNotasFiscais.TabIndex = 0;
             dgvNotasFiscais.SelectionChanged += dgvNotasFiscais_SelectionChanged;
-            // 
-            // groupBoxPesquisa
-            // 
-            groupBoxPesquisa.Controls.Add(btnLimparPesquisa);
-            groupBoxPesquisa.Controls.Add(btnPesquisar);
-            groupBoxPesquisa.Controls.Add(dtpPesquisaFim);
-            groupBoxPesquisa.Controls.Add(label3);
-            groupBoxPesquisa.Controls.Add(dtpPesquisaInicio);
-            groupBoxPesquisa.Controls.Add(label2);
-            groupBoxPesquisa.Controls.Add(txtPesquisaNumero);
-            groupBoxPesquisa.Controls.Add(label1);
-            groupBoxPesquisa.Dock = DockStyle.Top;
-            groupBoxPesquisa.Location = new Point(0, 0);
-            groupBoxPesquisa.Name = "groupBoxPesquisa";
-            groupBoxPesquisa.Size = new Size(1000, 80);
-            groupBoxPesquisa.TabIndex = 1;
-            groupBoxPesquisa.TabStop = false;
-            groupBoxPesquisa.Text = "Pesquisa";
-            // 
-            // btnLimparPesquisa
-            // 
-            btnLimparPesquisa.Location = new Point(520, 45);
-            btnLimparPesquisa.Name = "btnLimparPesquisa";
-            btnLimparPesquisa.Size = new Size(100, 25);
-            btnLimparPesquisa.TabIndex = 7;
-            btnLimparPesquisa.Text = "Limpar";
-            btnLimparPesquisa.UseVisualStyleBackColor = true;
-            btnLimparPesquisa.Click += btnLimparPesquisa_Click;
-            // 
-            // btnPesquisar
-            // 
-            btnPesquisar.Location = new Point(410, 45);
-            btnPesquisar.Name = "btnPesquisar";
-            btnPesquisar.Size = new Size(100, 25);
-            btnPesquisar.TabIndex = 6;
-            btnPesquisar.Text = "Pesquisar";
-            btnPesquisar.UseVisualStyleBackColor = true;
-            // 
-            // dtpPesquisaFim
-            // 
-            dtpPesquisaFim.Format = DateTimePickerFormat.Short;
-            dtpPesquisaFim.Location = new Point(330, 45);
-            dtpPesquisaFim.Name = "dtpPesquisaFim";
-            dtpPesquisaFim.Size = new Size(70, 23);
-            dtpPesquisaFim.TabIndex = 5;
-            // 
-            // label3
-            // 
-            label3.AutoSize = true;
-            label3.Location = new Point(330, 27);
-            label3.Name = "label3";
-            label3.Size = new Size(57, 15);
-            label3.TabIndex = 4;
-            label3.Text = "Data Fim:";
-            // 
-            // dtpPesquisaInicio
-            // 
-            dtpPesquisaInicio.Format = DateTimePickerFormat.Short;
-            dtpPesquisaInicio.Location = new Point(230, 45);
-            dtpPesquisaInicio.Name = "dtpPesquisaInicio";
-            dtpPesquisaInicio.Size = new Size(90, 23);
-            dtpPesquisaInicio.TabIndex = 3;
-            // 
-            // label2
-            // 
-            label2.AutoSize = true;
-            label2.Location = new Point(230, 27);
-            label2.Name = "label2";
-            label2.Size = new Size(66, 15);
-            label2.TabIndex = 2;
-            label2.Text = "Data Início:";
-            // 
-            // txtPesquisaNumero
-            // 
-            txtPesquisaNumero.Location = new Point(10, 45);
-            txtPesquisaNumero.Name = "txtPesquisaNumero";
-            txtPesquisaNumero.Size = new Size(200, 23);
-            txtPesquisaNumero.TabIndex = 1;
-            // 
-            // label1
-            // 
-            label1.AutoSize = true;
-            label1.Location = new Point(10, 27);
-            label1.Name = "label1";
-            label1.Size = new Size(54, 15);
-            label1.TabIndex = 0;
-            label1.Text = "Número:";
             // 
             // tabControl1
             // 
@@ -422,7 +324,7 @@ namespace Confentaria.Formularios
             tabPage2.Location = new Point(4, 24);
             tabPage2.Name = "tabPage2";
             tabPage2.Padding = new Padding(3);
-            tabPage2.Size = new Size(992, 431);
+            tabPage2.Size = new Size(992, 468);
             tabPage2.TabIndex = 1;
             tabPage2.Text = "Itens da Nota Fiscal";
             tabPage2.UseVisualStyleBackColor = true;
@@ -439,16 +341,6 @@ namespace Confentaria.Formularios
             dgvItens.Size = new Size(976, 315);
             dgvItens.TabIndex = 0;
             // 
-            // btnVincularProdutos
-            // 
-            btnVincularProdutos.Location = new Point(10, 10);
-            btnVincularProdutos.Name = "btnVincularProdutos";
-            btnVincularProdutos.Size = new Size(150, 30);
-            btnVincularProdutos.TabIndex = 1;
-            btnVincularProdutos.Text = "Vincular Produtos";
-            btnVincularProdutos.UseVisualStyleBackColor = true;
-            btnVincularProdutos.Click += btnVincularProdutos_Click;
-            // 
             // btnProcessarEstoque
             // 
             btnProcessarEstoque.BackColor = Color.FromArgb(0, 120, 215);
@@ -462,6 +354,16 @@ namespace Confentaria.Formularios
             btnProcessarEstoque.Text = "Processar Estoque";
             btnProcessarEstoque.UseVisualStyleBackColor = false;
             btnProcessarEstoque.Click += btnProcessarEstoque_Click;
+            // 
+            // btnVincularProdutos
+            // 
+            btnVincularProdutos.Location = new Point(10, 10);
+            btnVincularProdutos.Name = "btnVincularProdutos";
+            btnVincularProdutos.Size = new Size(150, 30);
+            btnVincularProdutos.TabIndex = 1;
+            btnVincularProdutos.Text = "Vincular Produtos";
+            btnVincularProdutos.UseVisualStyleBackColor = true;
+            btnVincularProdutos.Click += btnVincularProdutos_Click;
             // 
             // FrmNotasFiscais
             // 
@@ -478,8 +380,6 @@ namespace Confentaria.Formularios
             ((System.ComponentModel.ISupportInitialize)splitContainer1).EndInit();
             splitContainer1.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)dgvNotasFiscais).EndInit();
-            groupBoxPesquisa.ResumeLayout(false);
-            groupBoxPesquisa.PerformLayout();
             tabControl1.ResumeLayout(false);
             tabPage1.ResumeLayout(false);
             groupBoxCadastro.ResumeLayout(false);
@@ -492,15 +392,6 @@ namespace Confentaria.Formularios
         #endregion
 
         private SplitContainer splitContainer1;
-        private GroupBox groupBoxPesquisa;
-        private Button btnLimparPesquisa;
-        private Button btnPesquisar;
-        private DateTimePicker dtpPesquisaFim;
-        private Label label3;
-        private DateTimePicker dtpPesquisaInicio;
-        private Label label2;
-        private TextBox txtPesquisaNumero;
-        private Label label1;
         private DataGridView dgvNotasFiscais;
         private TabControl tabControl1;
         private TabPage tabPage1;

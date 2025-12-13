@@ -1,6 +1,7 @@
 using Confentaria.Data;
 using Confentaria.Models;
 using Microsoft.EntityFrameworkCore;
+using System.Drawing.Text;
 
 namespace Confentaria.Services
 {
@@ -70,10 +71,10 @@ namespace Confentaria.Services
                 .Where(i => i.NotaFiscalId == nota.Id && i.FornecedorProdutoId == null)
                 .Count();
 
-            if (itensNaoVinculados > 0)
+            if (itensVinculados.Count == 0)
             {
                 resultado.Sucesso = false;
-                resultado.Mensagem = $"Existem {itensNaoVinculados} itens não vinculados. Vincule todos os itens antes de processar.";
+                resultado.Mensagem = "Nenhum item vinculado encontrado. Vincule pelo menos um item para processar a nota.";
                 return resultado;
             }
 
@@ -88,13 +89,23 @@ namespace Confentaria.Services
             {
                 if (atualizarEstoque && item.FornecedorProduto?.Produto != null)
                 {
-                    // Aplica fator de conversão se existir
-                    var fatorConversao = item.FornecedorProduto.FatorConversao ?? 1;
-                    var quantidadeConvertida = item.Quantidade * fatorConversao;
+                    // Aplica conversão de unidades (valida e converte)
+                    var resultadoConversao = AplicarConversao(
+                        item.FornecedorProduto,
+                        item.Quantidade
+                    );
+
+                    if (!resultadoConversao.Sucesso)
+                    {
+                        resultado.Sucesso = false;
+                        resultado.Mensagem = resultadoConversao.Mensagem;
+                        resultado.FornecedorProdutoIdSemConversao = resultadoConversao.FornecedorProdutoId;
+                        return resultado;
+                    }
 
                     AtualizarEstoque(
                         item.FornecedorProduto.Produto,
-                        quantidadeConvertida,
+                        resultadoConversao.QuantidadeConvertida,
                         item.ValorUnitario,
                         nota.Id
                     );
@@ -102,13 +113,79 @@ namespace Confentaria.Services
                 }
             }
 
+
             // Marca nota como processada
             nota.DataProcessamento = DateTime.Now;
             _context.SaveChanges();
 
             resultado.Sucesso = true;
-            resultado.Mensagem = $"Nota fiscal processada com sucesso! {resultado.ItensProcessados} produtos atualizados.";
+            resultado.ItensIgnorados = itensNaoVinculados;
+            
+            var mensagem = $"✓ Nota fiscal processada com sucesso!\n\n";
+            
+            if (atualizarEstoque)
+            {
+                mensagem += $"• {resultado.ItensProcessados} produto(s) com estoque atualizado\n";
+            }
+            else
+            {
+                mensagem += $"• {resultado.ItensProcessados} produto(s) processado(s) (sem atualização de estoque)\n";
+            }
+            
+            if (itensNaoVinculados > 0)
+            {
+                mensagem += $"• {itensNaoVinculados} item(ns) ignorado(s) (não vinculados)";
+            }
+            
+            resultado.Mensagem = mensagem;
             return resultado;
+        }
+
+        /// <summary>
+        /// Aplica conversão de unidades se necessário.
+        /// Verifica se as unidades do fornecedor e do produto são diferentes,
+        /// e valida se existe fator de conversão definido.
+        /// </summary>
+        /// <param name="fornecedorProduto">Vínculo entre fornecedor e produto</param>
+        /// <param name="quantidade">Quantidade original da nota fiscal</param>
+        /// <returns>Resultado com sucesso/erro e quantidade convertida</returns>
+        private ResultadoConversao AplicarConversao(FornecedorProduto fornecedorProduto, decimal quantidade)
+        {
+            var resultado = new ResultadoConversao();
+            
+            // Obtém as unidades (normaliza para comparação)
+            var unidadeFornecedor = (fornecedorProduto.UnidadeMedidaFornecedor ?? "UN").Trim().ToUpper();
+            var unidadeProduto = fornecedorProduto.Produto.UnidadeMedida.Trim().ToUpper();
+
+            // Verifica se as unidades são diferentes
+            if (unidadeFornecedor != unidadeProduto)
+            {
+                // Unidades diferentes: PRECISA de fator de conversão
+                if (fornecedorProduto.FatorConversao == null || fornecedorProduto.FatorConversao == 0)
+                {
+                    // ERRO: Não há fator de conversão definido
+                    resultado.Sucesso = false;
+                    resultado.FornecedorProdutoId = fornecedorProduto.Id;
+                    resultado.Mensagem = $"⚠️ ERRO DE CONVERSÃO\n\n" +
+                        $"Produto: {fornecedorProduto.Produto.Nome}\n" +
+                        $"Unidade na nota: {unidadeFornecedor}\n" +
+                        $"Unidade do produto: {unidadeProduto}\n\n" +
+                        $"As unidades são DIFERENTES mas não há fator de conversão definido!";
+                    return resultado;
+                }
+
+                // Aplica o fator de conversão
+                resultado.Sucesso = true;
+                resultado.QuantidadeConvertida = quantidade * fornecedorProduto.FatorConversao.Value;
+                return resultado;
+            }
+            else
+            {
+                // Unidades iguais: não precisa converter
+                resultado.Sucesso = true;
+                resultado.QuantidadeConvertida = quantidade;
+                return resultado;
+            }
         }
 
         /// <summary>
@@ -132,5 +209,18 @@ namespace Confentaria.Services
         public bool Sucesso { get; set; }
         public string Mensagem { get; set; } = string.Empty;
         public int ItensProcessados { get; set; }
+        public int ItensIgnorados { get; set; }
+        public int? FornecedorProdutoIdSemConversao { get; set; }
+    }
+
+    /// <summary>
+    /// Resultado da operação de conversão de unidades
+    /// </summary>
+    public class ResultadoConversao
+    {
+        public bool Sucesso { get; set; }
+        public string Mensagem { get; set; } = string.Empty;
+        public decimal QuantidadeConvertida { get; set; }
+        public int FornecedorProdutoId { get; set; }
     }
 }

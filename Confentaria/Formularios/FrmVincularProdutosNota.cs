@@ -204,20 +204,43 @@ namespace Confentaria.Formularios
                 return;
             }
 
-            var itensNaoVinculados = _context.NotaFiscalItens
-                .Count(i => i.NotaFiscalId == _notaFiscal.Id && i.FornecedorProdutoId == null);
+            var totalItens = _context.NotaFiscalItens
+                .Count(i => i.NotaFiscalId == _notaFiscal.Id);
 
-            if (itensNaoVinculados > 0)
+            var itensVinculados = _context.NotaFiscalItens
+                .Count(i => i.NotaFiscalId == _notaFiscal.Id && i.FornecedorProdutoId != null);
+
+            var itensNaoVinculados = totalItens - itensVinculados;
+
+            if (itensVinculados == 0)
             {
-                MessageBox.Show("Vincule todos os itens antes de processar a nota!",
+                MessageBox.Show("Nenhum item foi vinculado! Vincule pelo menos um item para processar a nota.",
                     "Aviso", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return;
             }
 
             var atualizarEstoque = chkAtualizarEstoque.Checked;
-            var mensagemConfirmacao = atualizarEstoque
-                ? "Deseja processar esta nota fiscal e atualizar o estoque de todos os produtos vinculados?"
-                : "Deseja processar esta nota fiscal SEM atualizar o estoque?";
+            
+            var mensagemConfirmacao = $"PROCESSAMENTO DA NOTA FISCAL\n\n" +
+                $"Total de itens: {totalItens}\n" +
+                $"Itens vinculados: {itensVinculados}\n" +
+                $"Itens NÃO vinculados: {itensNaoVinculados}\n\n";
+
+            if (itensNaoVinculados > 0)
+            {
+                mensagemConfirmacao += $"⚠ {itensNaoVinculados} item(ns) não vinculado(s) será(ão) IGNORADO(S).\n\n";
+            }
+
+            if (atualizarEstoque)
+            {
+                mensagemConfirmacao += $"✓ O estoque dos {itensVinculados} produtos vinculados será ATUALIZADO.\n\n";
+            }
+            else
+            {
+                mensagemConfirmacao += $"✗ O estoque NÃO será atualizado.\n\n";
+            }
+
+            mensagemConfirmacao += "Deseja continuar?";
 
             var resultado = MessageBox.Show(mensagemConfirmacao,
                 "Confirmar Processamento",
